@@ -25,5 +25,5 @@ s.on('player:join',async({code,nickname})=>{const r=rooms.get(String(code));if(!
 s.on('host:start',()=>{const r=rooms.get(s.data.roomCode);if(r&&s.data.host&&r.phase==='lobby')startQuestion(r)});
 s.on('player:answer',async({answer})=>{const r=rooms.get(s.data.roomCode);if(!r||r.phase!=='question'||!r.participants.has(s.id)||r.answers.has(s.id))return;const q=(await getQuiz(r.quizId)).questions[r.questionIndex],elapsed=Date.now()-r.startedAt,limit=Math.max(1,+(q.timeLimit||15))*1000,is=correct(q,answer);let points=0;if(is){const ratio=Math.max(0,1-Math.min(elapsed,limit)/limit);points=Math.round((500+500*ratio)*(q.fever?2:1))}r.answers.set(s.id,{answer,correct:is,points,elapsed});r.participants.get(s.id).score+=points;s.emit('answer:locked',{correct:is,points});broadcast(r)});
 s.on('disconnect',()=>{const r=rooms.get(s.data.roomCode);if(!r)return;r.participants.delete(s.id);if(r.hostId===s.id){io.to(r.code).emit('error:msg','주최자가 나가서 방이 종료되었습니다.');rooms.delete(r.code)}else broadcast(r)})});
-app.get('*',(req,res)=>res.sendFile(require('path').join(__dirname,'public','index.html')));
+app.use((req,res)=>res.sendFile(require('path').join(__dirname,'public','index.html')));
 init().then(()=>server.listen(PORT,'0.0.0.0',()=>console.log('QUIZ LIVE ONLINE on '+PORT))).catch(e=>{console.error(e);process.exit(1)});
