@@ -1,6 +1,6 @@
 {
   "name": "quiz-live-online",
-  "version": "2.2.4",
+  "version": "2.2.2",
   "private": true,
   "scripts": {
     "start": "node server.js"
