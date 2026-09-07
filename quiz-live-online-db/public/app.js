@@ -1,13 +1,13 @@
 const app=document.getElementById('app'),socket=io();
 let quiz=null,role=null,code=null,locked=false,timer=null,currentQuestionIndex=-1;
 const COLORS=['#e84855','#f4b942','#2e9de0','#8b5cf6'];
-const AVATARS=['🦊','🐱','🐶','🐼','🐸','🐯','🐰','🐨','🦄','🐙','👾','🤖','girl1','girl2','girl3','girl4','girl5','girl6','girl7','pixel1','pixel2','pixel3','pixel4','pixel5','pixel6','pixel7','pixel8'];
-const PIXEL_AVATARS=new Set(['girl1','girl2','girl3','girl4','girl5','girl6','girl7','pixel1','pixel2','pixel3','pixel4','pixel5','pixel6','pixel7','pixel8']);
-const AVATAR_NAMES={girl1:'유나',girl2:'세리',girl3:'루나',girl4:'엘리',girl5:'하나',girl6:'미오',girl7:'리아',pixel1:'사이버 전사',pixel2:'사무라이',pixel3:'오컬트 술사',pixel4:'여기사',pixel5:'마녀',pixel6:'아이돌',pixel7:'사이버 걸',pixel8:'무녀'};
+const AVATARS=['🦊','🐱','🐶','🐼','🐸','🐯','🐰','🐨','🦄','🐙','👾','🤖','sub1','sub2','sub3','sub4','sub5','sub6','sub7','sub8','sub9','sub10','sub11','sub12'];
+const PIXEL_AVATARS=new Set(['sub1','sub2','sub3','sub4','sub5','sub6','sub7','sub8','sub9','sub10','sub11','sub12']);
+const AVATAR_NAMES={sub1:'핑크 고양이',sub2:'블루 테크',sub3:'퍼플 고딕',sub4:'골든 아가씨',sub5:'흑발 다크',sub6:'민트 소녀',sub7:'은발 아이스',sub8:'철갑 여기사',sub9:'사이버 보이',sub10:'붉은 악마',sub11:'보라 마녀',sub12:'핑크 아이돌'};
 let playerAvatar=sessionStorage.getItem('quiz-live-avatar')||'🦊';
 if(!AVATARS.includes(playerAvatar))playerAvatar='🦊';
 function avatarMarkup(a,cls='avatar-face'){const v=AVATARS.includes(a)?a:'🦊';return PIXEL_AVATARS.has(v)?`<img class="${cls}" src="/avatars/${v}.png" alt="${esc(AVATAR_NAMES[v]||'도트 아바타')}" title="${esc(AVATAR_NAMES[v]||'도트 아바타')}">`:`<span class="${cls} avatar-emoji">${esc(v)}</span>`}
-function avatarPicker(){return `<div class="avatar-picker"><label>아바타 <small>27종 · 마음에 드는 아이콘을 골라보세요</small></label><div class="avatar-grid">${AVATARS.map(a=>`<button type="button" class="avatar-choice ${a===playerAvatar?'selected':''} ${PIXEL_AVATARS.has(a)?'pixel-avatar':''}" data-avatar="${a}" title="${esc(AVATAR_NAMES[a]||a)}" onclick="selectAvatar(this, '${a}')">${avatarMarkup(a,'avatar-choice-img')}</button>`).join('')}</div></div>`}
+function avatarPicker(){return `<div class="avatar-picker"><label>아바타 <small>24종 · 마음에 드는 아이콘을 골라보세요</small></label><div class="avatar-grid">${AVATARS.map(a=>`<button type="button" class="avatar-choice ${a===playerAvatar?'selected':''} ${PIXEL_AVATARS.has(a)?'pixel-avatar':''}" data-avatar="${a}" title="${esc(AVATAR_NAMES[a]||a)}" onclick="selectAvatar(this, '${a}')">${avatarMarkup(a,'avatar-choice-img')}</button>`).join('')}</div></div>`}
 function selectAvatar(el,a){if(!AVATARS.includes(a))a='🦊';playerAvatar=a;document.querySelectorAll('.avatar-choice').forEach(x=>x.classList.toggle('selected',x===el));sessionStorage.setItem('quiz-live-avatar',a)}
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getLocalQuizzes(){try{return JSON.parse(localStorage.getItem('quiz-live-local')||'[]')}catch{return []}}

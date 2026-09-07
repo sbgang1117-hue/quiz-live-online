@@ -51,7 +51,7 @@ s.on('player:join',async({code,nickname,reconnectToken,avatar})=>{
   broadcast(r);await syncPlayer(s,r);return;
  }
  if(r.participants.size>=32)return s.emit('error:msg','최대 32명까지 참가할 수 있습니다.');
- const token=id(24),allowedAvatars=['🦊','🐱','🐶','🐼','🐸','🐯','🐰','🐨','🦄','🐙','👾','🤖','girl1','girl2','girl3','girl4','girl5','girl6','girl7','pixel1','pixel2','pixel3','pixel4','pixel5','pixel6','pixel7','pixel8'];const safeAvatar=allowedAvatars.includes(String(avatar))?String(avatar):'🦊';const p={id:s.id,nickname:String(nickname||'Player').trim().slice(0,20)||'Player',avatar:safeAvatar,score:0,reconnectToken:token,disconnectedAt:null};
+ const token=id(24),allowedAvatars=['🦊','🐱','🐶','🐼','🐸','🐯','🐰','🐨','🦄','🐙','👾','🤖','sub1','sub2','sub3','sub4','sub5','sub6','sub7','sub8','sub9','sub10','sub11','sub12'];const safeAvatar=allowedAvatars.includes(String(avatar))?String(avatar):'🦊';const p={id:s.id,nickname:String(nickname||'Player').trim().slice(0,20)||'Player',avatar:safeAvatar,score:0,reconnectToken:token,disconnectedAt:null};
  r.participants.set(s.id,p);s.join(r.code);s.data.roomCode=r.code;s.data.reconnectToken=token;
  s.emit('player:joined',{code:r.code,nickname:p.nickname,avatar:p.avatar,title:(await getQuiz(r.quizId)).title,reconnectToken:token});
  broadcast(r);await syncPlayer(s,r);
