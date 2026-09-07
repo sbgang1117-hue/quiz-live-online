@@ -22,7 +22,7 @@ function snapshot(r,q){const qu=r.questionIndex>=0?q.questions[r.questionIndex]:
 async function broadcast(r){const q=await getQuiz(r.quizId);if(q)io.to(r.code).emit('room:state',snapshot(r,q))}
 async function finish(r){const q=await getQuiz(r.quizId);r.phase='finished';const results=[...r.participants.values()].sort((a,b)=>b.score-a.score).map((p,i)=>({rank:i+1,nickname:p.nickname,avatar:p.avatar||'🦊',score:p.score,id:p.id}));io.to(r.code).emit('game:finished',{title:q.title,results});broadcast(r)}
 async function reveal(r){const q=await getQuiz(r.quizId);if(!q||r.phase!=='question')return;const qu=q.questions[r.questionIndex];const idx=r.questionIndex;
-// Score is intentionally committed only at reveal time. During the question,
+// Score is intentionally committed only at reveal time. v6.5.1 audit: points are not added during submission. During the question,
 // participants see their previous total so a correct answer is never spoiled early.
 for(const p of r.participants.values()){const a=r.answers.get(p.id);if(a&&!a.scoreCommitted){p.score+=a.points||0;a.scoreCommitted=true}}
 r.phase='reveal';
