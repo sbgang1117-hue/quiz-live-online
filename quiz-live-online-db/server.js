@@ -44,54 +44,46 @@ function activeParticipantCount(r){return [...r.participants.values()].filter(p=
 function raidConfig(q,r){return r.mode==='normal'&&q&&q.raidEnabled&&q.type==='choice'&&Array.isArray(q.options)&&q.options.length===8}
 function activeRiskPlayers(r){return [...r.participants.values()].filter(p=>!p.disconnectedAt&&!p.eliminated)}
 function raidThreshold(r,q){const n=[...r.participants.values()].filter(p=>!p.disconnectedAt&&!p.eliminated).length;if((q.raidThresholdType||'count')==='percent')return Math.max(1,Math.ceil(n*Math.max(1,Math.min(100,+q.raidThreshold||1))/100));return Math.max(1,Math.min(n,+q.raidThreshold||1))}
-function speedPoints(elapsed,limit,q){const ratio=Math.max(0,1-Math.min(elapsed,limit)/limit);const tier=Math.min(10,Math.max(1,Math.ceil(ratio*10)));const base=tier*100;return Math.round(base*(q.platinum?3:q.fever?2:1))}
-function startRiskChoice(r){
- getQuiz(r.quizId).then(q=>{
-  if(!q||r.phase==='finished')return;
-  const qu=q.questions[r.questionIndex];
-  if(!qu||!qu.highRisk){void beginQuestion(r);return}
-  clearTimeout(r.riskTimer);
-  const index=r.questionIndex;
-  const deadline=Date.now()+5000;
-  r.phase='riskChoice';
-  r.riskDeadline=deadline;
-  r.riskTransitioning=false;
-  for(const p of r.participants.values())if(!p.eliminated)p.riskChoice=null;
-  io.to(r.code).emit('question:riskChoice',{index,total:q.questions.length,seconds:5,deadline,question:pubQ(qu)});
-  void broadcast(r);
-  r.riskTimer=setTimeout(()=>{
-   if(r.phase!=='riskChoice'||r.questionIndex!==index||r.riskTransitioning)return;
-   r.riskTransitioning=true;
-   for(const p of activeRiskPlayers(r))if(!p.riskChoice)p.riskChoice='coward';
-   clearTimeout(r.riskTimer);r.riskTimer=null;r.riskDeadline=null;r.phase='riskStarting';
-   void beginQuestion(r);
-  },5000);
- }).catch(e=>console.error('RISK START ERROR',e));
+function speedPoints(elapsed,limit,q){const safeElapsed=Math.max(0,Math.min(Number(elapsed)||0,limit));const step=Math.max(1,limit/999);const base=Math.max(1,1000-Math.floor(safeElapsed/step));return Math.round(base*(q.platinum?3:q.fever?2:1))}
+function startRiskChoice(r,q){
+ const qu=q?.questions?.[r.questionIndex];
+ if(!qu||!qu.highRisk){void beginQuestion(r,q);return}
+ clearTimeout(r.riskTimer);const index=r.questionIndex;const deadline=Date.now()+5000;
+ r.phase='riskChoice';r.riskDeadline=deadline;r.riskTransitioning=false;
+ for(const p of r.participants.values())if(!p.eliminated)p.riskChoice=null;
+ io.to(r.code).emit('question:riskChoice',{index,total:q.questions.length,seconds:5,deadline,question:pubQ(qu)});void broadcast(r);
+ r.riskTimer=setTimeout(()=>{
+  if(r.phase!=='riskChoice'||r.questionIndex!==index||r.riskTransitioning)return;
+  r.riskTransitioning=true;
+  for(const p of activeRiskPlayers(r))if(!p.riskChoice)p.riskChoice='coward';
+  clearTimeout(r.riskTimer);r.riskTimer=null;r.riskDeadline=null;r.phase='riskStarting';
+  void beginQuestion(r,q).catch(e=>console.error('RISK TRANSITION ERROR',e));
+ },5000);
 }
-async function startRaidIntro(r){
- const q=await getQuiz(r.quizId);if(!q||r.phase==='finished')return;
- const qu=q.questions[r.questionIndex];if(!qu||!raidConfig(qu,r)){void beginQuestion(r);return}
- clearTimeout(r.raidTimer);
- const index=r.questionIndex;
- const deadline=Date.now()+7000;
+async function startRaidIntro(r,q){
+ const qu=q?.questions?.[r.questionIndex];if(!qu||!raidConfig(qu,r)){void beginQuestion(r,q);return}
+ clearTimeout(r.raidTimer);const index=r.questionIndex;const deadline=Date.now()+7000;
  r.phase='raidIntro';r.raidDeadline=deadline;
  io.to(r.code).emit('question:raidIntro',{index,total:q.questions.length,seconds:7,deadline,question:pubQ(qu)});void broadcast(r);
  r.raidTimer=setTimeout(()=>{
   if(r.phase!=='raidIntro'||r.questionIndex!==index)return;
   clearTimeout(r.raidTimer);r.raidTimer=null;r.raidDeadline=null;r.phase='raidStarting';
-  void beginQuestion(r);
+  void beginQuestion(r,q).catch(e=>console.error('RAID TRANSITION ERROR',e));
  },7000);
 }
-async function beginQuestion(r){
- const q=await getQuiz(r.quizId);if(!q||r.phase==='finished'||r.phase==='question'||r.phase==='reveal')return;
+async function beginQuestion(r,providedQ=null){
+ const q=providedQ||await getQuiz(r.quizId);if(!q||r.phase==='finished'||r.phase==='question'||r.phase==='reveal')return;
  clearTimeout(r.riskTimer);r.riskTimer=null;clearTimeout(r.raidTimer);r.raidTimer=null;
  r.riskDeadline=null;r.raidDeadline=null;
- const qu=q.questions[r.questionIndex];r.phase='question';r.answers=new Map();r.startedAt=Date.now();
+ const qu=q.questions[r.questionIndex];if(!qu)return;
+ r.phase='question';r.answers=new Map();r.startedAt=Date.now();
  for(const p of r.participants.values())if(!p.eliminated)p.riskChoice=p.riskChoice||'coward';
  io.to(r.code).emit('question:start',{index:r.questionIndex,total:q.questions.length,question:pubQ(qu)});void broadcast(r);
  clearTimeout(r.nextTimer);const idx=r.questionIndex;const delay=Math.max(1,+(qu.timeLimit||15))*1000;
  r.nextTimer=setTimeout(()=>{if(r.phase==='question'&&r.questionIndex===idx)void reveal(r).catch(e=>console.error('REVEAL TIMER ERROR',e))},delay);
 }
+async function startQuestion(r){const q=await getQuiz(r.quizId);if(!q||r.phase==='finished'||r.startingTransition)return;if(r.mode==='speedrun')return startSpeedrun(r);clearTimeout(r.nextTimer);clearTimeout(r.revealTimer);clearTimeout(r.riskTimer);clearTimeout(r.raidTimer);r.nextTimer=r.revealTimer=r.riskTimer=r.raidTimer=null;r.riskDeadline=null;r.raidDeadline=null;r.questionIndex++;if(r.questionIndex>=q.questions.length)return finish(r);const qu=q.questions[r.questionIndex];r.startingTransition=true;try{if(raidConfig(qu,r)){startRaidIntro(r,q);return}if(r.mode!=='death'&&qu.highRisk){startRiskChoice(r,q);return}await beginQuestion(r,q)}finally{r.startingTransition=false}}
+
 function startSpeedrun(r){getQuiz(r.quizId).then(q=>{r.phase='speedrun';r.startedAt=Date.now();for(const p of r.participants.values()){p.speedIndex=0;p.speedRunStartedAt=Date.now();p.speedStartedAt=p.speedRunStartedAt;p.speedHistory=[];p.speedFinished=false}if(r.hostId)io.to(r.hostId).emit('speedrun:start',{total:q.questions.length,title:q.title});for(const p of r.participants.values())sendSpeedQuestion(r,p,q);broadcast(r);});}
 async function sendSpeedQuestion(r,p,q,resetClock=true){if(!p||p.eliminated||p.speedFinished)return;if(p.speedIndex>=q.questions.length){p.speedFinished=true;p.speedGoalAt=Date.now();p.speedElapsed=p.speedGoalAt-(p.speedRunStartedAt||p.speedGoalAt);io.to(p.id).emit('speedrun:goal',{score:p.score});if([...r.participants.values()].filter(x=>!x.disconnectedAt&&!x.eliminated).every(x=>x.speedFinished))return finishSpeedrun(r);broadcast(r);return}const qu=q.questions[p.speedIndex];if(!p.speedRunStartedAt)p.speedRunStartedAt=Date.now();p.speedStartedAt=Date.now();io.to(p.id).emit('speedrun:question',{index:p.speedIndex,total:q.questions.length,question:pubQ(qu),score:p.score});if(r.hostId)io.to(r.hostId).emit('speedrun:hostQuestion',{index:p.speedIndex,total:q.questions.length,question:pubQ(qu)});void broadcast(r)}async function finishSpeedrun(r){const q=await getQuiz(r.quizId);r.phase='finished';const results=[...r.participants.values()].sort((a,b)=>b.score-a.score).map((p,i)=>({rank:i+1,nickname:p.nickname,avatar:p.avatar||'🦊',score:p.score,id:p.id,correctCount:(p.speedHistory||[]).filter(x=>x.correct).length,answered:(p.speedHistory||[]).length,totalQuestions:q.questions.length,accuracy:p.speedHistory?.length?Math.round(p.speedHistory.filter(x=>x.correct).length/p.speedHistory.length*100):0,avgResponseMs:p.speedHistory?.length?Math.round(p.speedHistory.reduce((a,x)=>a+x.elapsed,0)/p.speedHistory.length):0,maxCombo:0,eliminated:false}));io.to(r.code).emit('game:finished',{title:q.title,results,history:r.history||[],mode:'speedrun',comboEnabled:false});broadcast(r)}
 function maybeReveal(r,q){if(!q||(r.mode!=='speedrun'&&q.waitFullTime!==false)||r.phase!=='question')return false;const active=activeParticipantCount(r);if(active>0&&r.answers.size>=active){clearTimeout(r.nextTimer);void reveal(r);return true}return false}
@@ -111,7 +103,7 @@ for(const p of r.participants.values()){
 }
 if(r.hostId)io.to(r.hostId).emit('host:answers',[...r.answers.entries()].map(([playerId,a])=>({playerId,nickname:r.participants.get(playerId)?.nickname||'Player',...a})));
 broadcast(r);clearTimeout(r.revealTimer);if(r.mode==='death'&&activeParticipantCount(r)<=1)return finish(r);const nextQ=q.questions[r.questionIndex+1];const betweenDelay=3000;r.revealTimer=setTimeout(async()=>{if(r.mode==='death'&&activeParticipantCount(r)<=1){return finish(r)}if(r.questionIndex+1<q.questions.length){r.phase='between';io.to(r.code).emit('question:nextPreview',{index:r.questionIndex+1,total:q.questions.length,question:pubQ(q.questions[r.questionIndex+1])});broadcast(r);r.revealTimer=setTimeout(()=>startQuestion(r),betweenDelay)}else finish(r)},Math.max(0,+(qu.revealSeconds||5))*1000)}
-async function startQuestion(r){const q=await getQuiz(r.quizId);if(!q)return;if(r.mode==='speedrun')return startSpeedrun(r);r.questionIndex++;if(r.questionIndex>=q.questions.length)return finish(r);const qu=q.questions[r.questionIndex];if(raidConfig(qu,r))return startRaidIntro(r);if(r.mode!=='death'&&qu.highRisk)return startRiskChoice(r);return beginQuestion(r)}
+async function startQuestion(r){const q=await getQuiz(r.quizId);if(!q||r.phase==='finished'||r.startingTransition)return;if(r.mode==='speedrun')return startSpeedrun(r);clearTimeout(r.nextTimer);clearTimeout(r.revealTimer);clearTimeout(r.riskTimer);clearTimeout(r.raidTimer);r.nextTimer=r.revealTimer=r.riskTimer=r.raidTimer=null;r.riskDeadline=null;r.raidDeadline=null;r.questionIndex++;if(r.questionIndex>=q.questions.length)return finish(r);const qu=q.questions[r.questionIndex];r.startingTransition=true;try{if(raidConfig(qu,r)){await startRaidIntro(r);return}if(r.mode!=='death'&&qu.highRisk){await startRiskChoice(r);return}await beginQuestion(r)}finally{r.startingTransition=false}}
 function norm(v){return String(v??'').trim().toLowerCase().replace(/\s+/g,' ')}function correct(q,a){if(q.type==='multiple'){return JSON.stringify((Array.isArray(a)?a:[a]).map(norm).sort())===JSON.stringify((Array.isArray(q.answer)?q.answer:[q.answer]).map(norm).sort())}if(q.type==='ordering'){const aa=(Array.isArray(a)?a:[a]).map(Number);const qq=(Array.isArray(q.answer)?q.answer:[q.answer]).map(Number);return aa.length===qq.length&&aa.every((v,i)=>v===qq[i]);}if(q.type==='subjective')return (Array.isArray(q.answer)?q.answer:[q.answer]).map(norm).includes(norm(a));return norm(a)===norm(q.answer)}
 async function syncPlayer(s,r){const q=await getQuiz(r.quizId);if(!q)return;
  if(r.mode==='speedrun'&&r.phase==='speedrun'){const p=r.participants.get(s.id);if(p?.speedFinished)s.emit('speedrun:goal',{score:p.score});else if(p)sendSpeedQuestion(r,p,q,false);return}
