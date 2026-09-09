@@ -240,3 +240,7 @@
 .raid-battle-screen .game-question-card:before{content:'👑 RAID BOSS';display:inline-block;margin-bottom:8px;padding:5px 11px;border:1px solid #ffd45d88;border-radius:999px;background:#21160a99;color:#ffd45d;font-size:11px;font-weight:1000;letter-spacing:2px;box-shadow:0 0 18px #ffd45d18}
 .raid-battle-screen .answers{position:relative;z-index:6}
 @media(max-width:700px){.raid-battle-chain{font-size:23px;letter-spacing:-7px}.raid-boss-seal{width:82px;height:82px;font-size:28px;opacity:.18}.raid-boss-seal span{font-size:9px;letter-spacing:3px}.raid-battle-vignette{border-width:10px}.raid-battle-screen .game-question-card:before{font-size:9px}}
+
+/* v8.2: RAID chain reference follows the user's rough exactly; no redesigned chain shapes */
+.raid-user-chain-reference{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:2;pointer-events:none;user-select:none;opacity:.86;mix-blend-mode:screen}
+.raid-battle-screen>.game-layout,.raid-battle-screen>.top{z-index:5}
