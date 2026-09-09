@@ -96,9 +96,55 @@ function postYoutubeVolume(v){const payload=JSON.stringify({event:'command',func
 function setMediaVolume(value){const q=window.__currentQ;if(!q)return;const v=Math.max(0,Math.min(100,Number(value)||0));localStorage.setItem(mediaVolumeKey(q),String(v));const out=document.getElementById('mediaVolumeValue');if(out)out.textContent=v+'%';const a=document.getElementById('qAudio');if(a)a.volume=v/100;if(q.videoId)postYoutubeVolume(v)}
 function media(q,reveal=false,participant=false){const photo=q.imageUrl?`<div class=\"question-image\"><img src=\"${esc(q.imageUrl)}\"></div>`:'';if(q.audioUrl)return photo+audioTag(q);if(!q.videoId)return photo||`<div class=\"eq\">${'<i></i>'.repeat(7)}</div>`;const id=vid(q.videoId);if(!id)return photo;if(!q.showVideo&&!reveal)return photo+`<div class=\"card audio-hidden\"><div class=\"eq\">${'<i></i>'.repeat(9)}</div><p style=\"text-align:center\">🎵 AUDIO PLAYING</p><iframe class=\"hidden-audio-frame\" src=\"https://www.youtube-nocookie.com/embed/${encodeURIComponent(id)}?autoplay=1&mute=0&controls=0&disablekb=1&rel=0&playsinline=1&cc_load_policy=0&enablejsapi=1&origin=${encodeURIComponent(location.origin)}&start=${Math.floor(q.start||0)}&end=${Math.floor(q.end||0)}\" allow=\"autoplay; encrypted-media\"></iframe></div>`;return photo+ytFrame(id,q.start,q.end,false,participant)}
 function renderDeathPanel(){const s=window.__roomState;if(!s||s.mode!=='death')return '';const ps=[...(s.participants||[])];return `<aside class="death-panel"><div class="death-panel-head"><div><b>☠️ SURVIVORS</b><small>${ps.filter(x=>!x.eliminated).length}명 생존</small></div><strong>${ps.length}</strong></div><div class="death-grid">${ps.map(x=>`<div class="death-player ${x.eliminated?'dead':''}">${avatarMarkup(x.avatar||'🦊','death-avatar')}<span>${esc(x.nickname)}</span>${x.eliminated?'<i>OUT</i>':''}</div>`).join('')}</div></aside>`}function renderTeamPanel(){const s=window.__roomState;if(!s||s.mode!=='team')return '';const me=s.participants.find(x=>x.id===socket.id)||s.participants.find(x=>x.nickname===sessionStorage.getItem('quiz-live-nickname'));const team=me?.team||'red';const members=s.participants.filter(x=>x.team===team);const acc=members[0]?.teamAccuracy??0;return `<aside class="team-panel"><div class="team-panel-title">${team==='red'?'🔴 RED TEAM':'🔵 BLUE TEAM'} <b>${acc}%</b></div>${members.map(x=>`<div class="team-member">${avatarMarkup(x.avatar||'🦊','team-member-avatar')}<span>${esc(x.nickname)}</span><small>${x.teamAccuracy??0}%</small></div>`).join('')}</aside>`}function showRiskChoice(d){clearInterval(timer);const q=d.question,deadline=Number(d.deadline)||Date.now()+5000;app.innerHTML=`<div class="wrap risk-choice-screen high-risk-active"><div class="risk-fire-aura" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><div class="hero"><div class="logo high-risk-logo">⚠️ HIGH RISK</div><div class="risk-warning">RISK / REWARD</div><h1>${esc(q.prompt)}</h1><p class="muted">5초 안에 선택하세요. 선택하지 않으면 겁쟁이로 처리됩니다.</p></div><div class="risk-choice-grid"><button id="riskCoward" onclick="chooseRisk('coward')" class="risk-card coward"><strong>겁쟁이</strong><span>정상 점수</span></button><button id="riskChallenge" onclick="chooseRisk('challenge')" class="risk-card challenge"><strong>도전</strong><span>정답 2배 · 오답 기본점수만큼 마이너스</span></button></div><div id="riskTimer" class="risk-countdown">5</div><p id="riskChoiceStatus" class="risk-choice-status">선택 후에도 5초가 끝날 때까지 다시 바꿀 수 있습니다.</p></div>`;const tick=()=>{const el=document.getElementById('riskTimer');if(!el)return;const sec=Math.max(0,Math.ceil((deadline-Date.now())/1000));el.textContent=sec;if(sec<=0){clearInterval(timer);return}};tick();timer=setInterval(tick,100)}function chooseRisk(choice){const selected=document.getElementById(choice==='challenge'?'riskChallenge':'riskCoward');document.querySelectorAll('.risk-card').forEach(b=>{b.classList.remove('selected')});if(selected)selected.classList.add('selected');const st=document.getElementById('riskChoiceStatus');if(st)st.textContent=choice==='challenge'?'도전 선택 · 5초가 끝날 때까지 다시 바꿀 수 있습니다.':'겁쟁이 선택 · 5초가 끝날 때까지 다시 바꿀 수 있습니다.';socket.timeout(1500).emit('question:riskChoice',{choice},()=>{})}
-function specialCountdownScreen(kind,d){clearInterval(timer);const q=d.question||{};const isRaid=kind==='raid',sec0=Math.max(1,Number(d.seconds)||(isRaid?7:5));let sec=sec0;const title=isRaid?'👑 RAID INCOMING':'⚠️ HIGH RISK';const sub=isRaid?'사신이 레이드를 준비합니다. 아래 규칙을 확인한 뒤 7초 후 8지선다 문제가 시작됩니다.':'5초 동안 도전 여부를 선택합니다.';const art=isRaid?`<div class="raid-intro-art" aria-hidden="true"><div class="raid-reaper">☠️</div><div class="raid-chain chain-a">⛓</div><div class="raid-chain chain-b">⛓</div><div class="raid-chain chain-c">⛓</div><div class="raid-chain chain-d">⛓</div></div>`:`<div class="risk-intro-art" aria-hidden="true"><div class="risk-core">⚠️</div><i></i><i></i><i></i></div>`;const raidRule=isRaid?`<div class="raid-intro-rules"><div class="raid-rule-title">👑 RAID RULES</div><div class="raid-rule-main">8개의 선택지 중 정답을 고르세요.</div><div class="raid-rule-detail">${esc(q.raidThresholdType==='percent'?`생존 참가자의 ${Math.max(1,Math.min(100,Number(q.raidThreshold)||1))}% 이상이 정답을 맞히면 레이드 성공`:`정답자 ${Math.max(1,Number(q.raidThreshold)||1)}명 이상이면 레이드 성공`)}</div><div class="raid-rule-note">성공: 정답자 점수 지급 · 실패: 레이드 보상 없음</div></div>`:'';app.innerHTML=`<div class="wrap ${isRaid?'raid-intro-screen':'risk-intro-screen'}"><div class="hero">${art}<div class="mode-mini-badge">${title}</div><div class="big intro-count" id="introTimer">${sec}</div>${raidRule}<h1>${esc(q.prompt||'다음 문제')}</h1><p class="muted">${sub}</p></div></div>`;timer=setInterval(()=>{sec--;const el=document.getElementById('introTimer');if(el)el.textContent=Math.max(0,sec);if(sec<=0)clearInterval(timer)},1000)}
+function specialCountdownScreen(kind,d){
+ clearInterval(timer);
+ const q=d.question||{};
+ const isRaid=kind==='raid';
+ const sec0=Math.max(1,Number(d.seconds)||(isRaid?7:5));
+ let sec=sec0;
+ if(isRaid){
+   const threshold=q.raidThresholdType==='percent'
+     ? `생존 참가자의 ${Math.max(1,Math.min(100,Number(q.raidThreshold)||1))}% 이상 정답`
+     : `정답자 ${Math.max(1,Number(q.raidThreshold)||1)}명 이상`;
+   app.innerHTML=`<div class="wrap raid-intro-screen">
+     <div class="hero raid-intro-hero">
+       <div class="raid-intro-art" aria-hidden="true">
+         <div class="raid-reaper">☠️</div>
+         <div class="raid-chain chain-a">⛓</div><div class="raid-chain chain-b">⛓</div>
+         <div class="raid-chain chain-c">⛓</div><div class="raid-chain chain-d">⛓</div>
+       </div>
+       <div class="mode-mini-badge">👑 RAID INCOMING</div>
+       <div class="raid-intro-rules">
+         <div class="raid-rule-title">RAID RULES</div>
+         <div class="raid-rule-main">이 문제는 8지선다 레이드입니다.</div>
+         <div class="raid-rule-detail">${esc(threshold)}이면 <b>레이드 성공</b></div>
+         <div class="raid-rule-detail">성공: 정답자 점수 지급 · 실패: 정답자 점수 없음</div>
+         <div class="raid-rule-note">지금은 규칙 확인 시간입니다. 카운트가 끝나면 바로 문제를 시작합니다.</div>
+       </div>
+       <div class="big intro-count" id="introTimer">${sec}</div>
+       <div class="raid-next-label">${Number(d.index||0)+1}번 문제 준비</div>
+     </div>
+   </div>`;
+   playRaidDoomSound();
+ }else{
+   app.innerHTML=`<div class="wrap risk-intro-screen high-risk-active">
+     <div class="risk-fire-aura" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+     <div class="hero risk-intro-hero">
+       <div class="high-risk-logo logo">⚠️ HIGH RISK</div>
+       <div class="risk-warning">RISK / REWARD</div>
+       <div class="risk-intro-art-static" aria-hidden="true">⚠️</div>
+       <div class="risk-host-rules"><b>문제 시작 전 5초 선택</b><span>겁쟁이: 정상 점수 · 도전: 정답 2배 / 오답 기본점수만큼 감점</span><small>5초 동안 선택을 자유롭게 바꿀 수 있습니다.</small></div>
+       <div class="big intro-count risk-countdown" id="introTimer">${sec}</div>
+       <div class="risk-next-label">${Number(d.index||0)+1}번 문제 준비</div>
+     </div>
+   </div>`;
+ }
+ const tick=()=>{const el=document.getElementById('introTimer');if(!el)return;const left=Math.max(0,Number(d.deadline||Date.now()+sec0*1000)-Date.now());const shown=Math.ceil(left/1000);el.textContent=shown;if(shown<=0)clearInterval(timer)};
+ tick();
+ timer=setInterval(tick,100);
+}
 function riskHostView(d){specialCountdownScreen('risk',d)}
-function raidIntroView(d){specialCountdownScreen('raid',d);playRaidDoomSound()}
+function raidIntroView(d){specialCountdownScreen('raid',d)}
 function speedrunHostView(d){clearInterval(timer);applyTheme(window.__roomQuizTheme||{});app.innerHTML=`<div class="wrap speedrun-host-screen"><div class="speedrun-layout"><main><div class="mode-hero mode-speedrun"><div class="mode-emblem">⚡</div><div class="mode-title">스피드런 관전</div><p>답을 제출하는 즉시 다음 문제로 이동합니다. 정확하고 빠르게 푸는 사람이 승리합니다.</p><span class="mode-lobby-note">출제자의 관전 화면입니다.</span></div><div class="card"><b>참가자의 문제 풀이와 진행 상황을 실시간으로 관전할 수 있습니다.</b></div></main>${speedrunPlayers()}</div></div>`;update(window.__roomState||{participants:[],mode:'speedrun',totalQuestions:d.total||0})}
 
 function speedrunHostQuestion(d){

@@ -1,3 +1,5 @@
+QUIZ LIVE v8.0.0
+
 # QUIZ LIVE v7.5.0
 
 v6.6.0을 기반으로 한 대형 기능 패치입니다.
@@ -83,3 +85,9 @@ Postgres를 사용하려면 `DATABASE_URL`을 설정합니다. 설정하지 않�
 - 데스 모드 실시간 생존 그리드/탈락 카드
 - 스피드런 실시간 사이드 랭킹/누적 경과시간
 - 수정 후 바로 방 만들기 자동 저장
+
+
+## v8.0.0 transition fix
+- Removed duplicate startQuestion definition that could bypass first-question HIGH RISK/RAID intros.
+- HIGH RISK now always shows a dedicated 5-second pre-question screen.
+- RAID now always shows a dedicated 7-second reaper/rules pre-question screen, including question 1.
