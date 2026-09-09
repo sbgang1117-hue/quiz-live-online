@@ -174,3 +174,25 @@
 .death-spectator-answer strong{font-size:18px;color:#ff7b86}
 .death-spectator-answer span{font-size:11px;color:#aeb6c4;line-height:1.5}
 @media(max-width:800px){.speedrun-host-screen .speedrun-layout{grid-template-columns:1fr}.speedrun-host-screen .speedrun-live-panel{position:static;order:2}}
+
+
+/* v7.8 final reliability / UX overrides */
+.mode-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+.mode-card{width:100%!important;min-height:132px!important;padding:18px!important;display:block!important;text-align:left!important;overflow:hidden!important}
+.mode-card-copy{display:flex;flex-direction:column;gap:10px;min-width:0;width:100%;height:100%}
+.mode-card-copy strong{display:block!important;font-size:20px!important;line-height:1.2!important;padding:0!important;white-space:nowrap!important}
+.mode-card-copy small{display:block!important;width:100%!important;font-size:12px!important;line-height:1.6!important;color:var(--muted)!important;white-space:normal!important;overflow:visible!important}
+.mode-card.selected{box-shadow:0 0 0 2px #ffffff12,0 12px 30px #0005!important}
+.risk-choice-status{position:relative;z-index:5;text-align:center;color:#ffb7bd;font-size:13px;font-weight:800;margin:12px 0 0}
+.risk-card{cursor:pointer!important}
+.risk-card:disabled{opacity:1!important;cursor:pointer!important}
+.risk-card.selected{filter:brightness(.86)!important}
+.raid-lobby-rules{position:relative;z-index:8;width:min(760px,100%);margin:18px auto 0;padding:18px 20px;border:2px solid #ff465966;border-radius:18px;background:linear-gradient(135deg,#32141bdd,#17111add);box-shadow:0 0 35px #ff233d16,inset 0 0 30px #ff233d0a;text-align:left}
+.raid-lobby-rules>strong{display:block;color:#ffd35e;font-size:15px;letter-spacing:1px;margin-bottom:8px}
+.raid-lobby-rules h3{margin:0 0 8px;font-size:18px;line-height:1.45;color:#fff}
+.raid-lobby-rules p{margin:0 0 8px;font-size:13px;line-height:1.7;color:#d8dce7}
+.raid-lobby-rules>b{font-size:12px;color:#ff9ca6}
+.raid-intro-screen .hero{min-height:620px!important}
+.raid-intro-screen .raid-reaper{font-size:150px!important}
+.raid-intro-screen .intro-count{font-size:96px!important}
+@media(max-width:800px){.mode-grid{grid-template-columns:1fr!important}.mode-card{min-height:120px!important}.raid-intro-screen .hero{min-height:500px!important}.raid-intro-screen .raid-reaper{font-size:110px!important}.raid-intro-screen .intro-count{font-size:72px!important}}
