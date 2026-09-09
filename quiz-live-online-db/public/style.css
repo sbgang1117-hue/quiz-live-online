@@ -216,3 +216,27 @@
 .raid-rule-title{font-size:22px!important;font-weight:1000;letter-spacing:2px;color:#ffd65e!important;margin-bottom:10px}.raid-rule-main{font-size:23px!important;font-weight:1000;line-height:1.45}.raid-rule-detail{font-size:18px!important;font-weight:900;line-height:1.55;color:#fff!important}.raid-rule-note{font-size:14px!important;font-weight:900;line-height:1.5;color:#ffced2!important;margin-top:10px}
 .raid-intro-screen .intro-count{position:relative;z-index:9;font-size:100px!important;color:#ff6674!important;text-shadow:0 0 35px #ff243fbb;line-height:1;margin:4px 0;animation:riskPulse .8s infinite alternate}
 @media(max-width:700px){.risk-intro-hero{min-height:560px!important}.risk-intro-art-static{font-size:68px}.risk-host-rules{padding:15px 14px}.risk-host-rules b{font-size:18px}.risk-host-rules span{font-size:14px}.risk-host-rules small{font-size:12px}.risk-intro-screen .intro-count{font-size:72px!important}.raid-intro-hero{min-height:620px!important}.raid-intro-screen .raid-reaper{font-size:115px!important}.raid-intro-rules{width:calc(100% - 20px);padding:16px 14px}.raid-rule-title{font-size:17px!important}.raid-rule-main{font-size:18px!important}.raid-rule-detail{font-size:15px!important}.raid-rule-note{font-size:12px!important}.raid-intro-screen .intro-count{font-size:72px!important}}
+
+
+/* v8.1 RAID BOSS QUESTION VISUALS */
+.raid-battle-screen{position:relative;isolation:isolate;overflow:hidden!important;background:radial-gradient(circle at 50% 42%,#4b101d22 0%,transparent 38%),#0b0e16}
+.raid-battle-screen>.game-layout,.raid-battle-screen>.top{position:relative;z-index:5}
+.raid-battle-fx{position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;background:radial-gradient(circle at 50% 45%,transparent 28%,#ff20320a 54%,#0008 100%)}
+.raid-battle-vignette{position:absolute;inset:0;border:18px solid #ff314322;box-shadow:inset 0 0 110px #000c,inset 0 0 50px #ff1f3518;animation:raidVignettePulse 2.2s ease-in-out infinite}
+.raid-boss-seal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:118px;height:118px;border:2px solid #ff5364aa;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle,#3b0d18cc,#0b0d13dd 65%);box-shadow:0 0 30px #ff203355,0 0 90px #ff203322;color:#ffd45f;font-size:40px;animation:raidSealPulse 1.8s ease-in-out infinite;opacity:.28}
+.raid-boss-seal span{font-size:12px;font-weight:1000;letter-spacing:4px;color:#ff7985;margin-top:-4px}
+.raid-battle-chain{position:absolute;color:#c9ced8;font-size:32px;letter-spacing:-8px;filter:drop-shadow(0 0 5px #000) drop-shadow(0 0 8px #ff435422);opacity:.8;white-space:nowrap}
+.rb1{left:-3%;top:8%;transform:rotate(10deg);animation:raidChainFloat1 4.2s ease-in-out infinite}
+.rb2{right:-4%;top:16%;transform:rotate(-12deg);animation:raidChainFloat2 3.7s ease-in-out infinite}
+.rb3{left:-5%;bottom:18%;transform:rotate(-14deg);animation:raidChainFloat2 4.5s ease-in-out infinite reverse}
+.rb4{right:-5%;bottom:11%;transform:rotate(12deg);animation:raidChainFloat1 4.0s ease-in-out infinite reverse}
+.rb5{left:8%;top:-2%;transform:rotate(20deg) scale(.85);animation:raidChainFloat1 5s ease-in-out infinite -1s}
+.rb6{right:8%;top:1%;transform:rotate(-20deg) scale(.85);animation:raidChainFloat2 4.8s ease-in-out infinite -1.4s}
+@keyframes raidChainFloat1{0%,100%{transform:translate(0,0) rotate(10deg)}50%{transform:translate(16px,9px) rotate(15deg)}}
+@keyframes raidChainFloat2{0%,100%{transform:translate(0,0) rotate(-12deg)}50%{transform:translate(-14px,10px) rotate(-7deg)}}
+@keyframes raidSealPulse{0%,100%{transform:translate(-50%,-50%) scale(.94);opacity:.2}50%{transform:translate(-50%,-50%) scale(1.06);opacity:.36}}
+@keyframes raidVignettePulse{0%,100%{border-color:#ff314318;box-shadow:inset 0 0 110px #000c,inset 0 0 50px #ff1f3510}50%{border-color:#ff31434a;box-shadow:inset 0 0 120px #000d,inset 0 0 65px #ff1f3522}}
+.raid-battle-screen .game-question-card{border-color:#ff405577!important;box-shadow:0 0 30px #ff203315,inset 0 0 30px #ff20330a}
+.raid-battle-screen .game-question-card:before{content:'👑 RAID BOSS';display:inline-block;margin-bottom:8px;padding:5px 11px;border:1px solid #ffd45d88;border-radius:999px;background:#21160a99;color:#ffd45d;font-size:11px;font-weight:1000;letter-spacing:2px;box-shadow:0 0 18px #ffd45d18}
+.raid-battle-screen .answers{position:relative;z-index:6}
+@media(max-width:700px){.raid-battle-chain{font-size:23px;letter-spacing:-7px}.raid-boss-seal{width:82px;height:82px;font-size:28px;opacity:.18}.raid-boss-seal span{font-size:9px;letter-spacing:3px}.raid-battle-vignette{border-width:10px}.raid-battle-screen .game-question-card:before{font-size:9px}}
