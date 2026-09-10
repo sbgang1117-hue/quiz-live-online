@@ -244,3 +244,26 @@
 /* v8.2: RAID chain reference follows the user's rough exactly; no redesigned chain shapes */
 .raid-user-chain-reference{position:fixed;inset:0;width:100vw;height:100vh;object-fit:cover;z-index:2;pointer-events:none;user-select:none;opacity:.86;mix-blend-mode:screen}
 .raid-battle-screen>.game-layout,.raid-battle-screen>.top{z-index:5}
+
+/* v8.3 RAID BOSS: replace chain overlay with roaming reapers */
+.raid-battle-screen .raid-user-chain-reference{display:none!important}
+.raid-reaper-field{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.raid-roaming-reaper{position:absolute;display:grid;place-items:center;width:74px;height:74px;border-radius:50%;color:#f4f5f7;font-size:46px;font-weight:900;line-height:1;opacity:.24;filter:drop-shadow(0 0 8px #ff243f66) drop-shadow(0 0 22px #ff243f22);text-shadow:0 0 10px #fff6,0 0 22px #ff243f77;animation-timing-function:ease-in-out;animation-iteration-count:infinite;animation-direction:alternate;will-change:transform,opacity}
+.raid-roaming-reaper:after{content:'';position:absolute;width:48px;height:18px;border-radius:50%;background:#ff20351c;filter:blur(9px);bottom:8px;z-index:-1}
+.reaper-1{left:3%;top:14%;animation:reaperPatrol1 6.8s infinite}
+.reaper-2{right:5%;top:9%;font-size:38px;animation:reaperPatrol2 7.4s infinite reverse}
+.reaper-3{left:7%;bottom:16%;font-size:52px;animation:reaperPatrol3 8.2s infinite}
+.reaper-4{right:4%;bottom:18%;font-size:44px;animation:reaperPatrol4 6.4s infinite reverse}
+.reaper-5{left:18%;top:3%;font-size:30px;opacity:.18;animation:reaperPatrol5 9.1s infinite}
+.reaper-6{right:18%;top:2%;font-size:34px;opacity:.18;animation:reaperPatrol6 8.7s infinite reverse}
+.reaper-7{left:20%;bottom:4%;font-size:32px;opacity:.17;animation:reaperPatrol7 8.9s infinite}
+.reaper-8{right:20%;bottom:3%;font-size:30px;opacity:.17;animation:reaperPatrol8 9.6s infinite reverse}
+@keyframes reaperPatrol1{0%{transform:translate(0,0) rotate(-8deg) scale(.9);opacity:.16}35%{transform:translate(35px,18px) rotate(5deg) scale(1);opacity:.28}70%{transform:translate(18px,65px) rotate(-4deg) scale(.95);opacity:.2}100%{transform:translate(72px,40px) rotate(8deg) scale(1.04);opacity:.3}}
+@keyframes reaperPatrol2{0%{transform:translate(0,0) rotate(7deg) scale(.95)}40%{transform:translate(-42px,30px) rotate(-6deg) scale(1.06)}75%{transform:translate(-18px,72px) rotate(4deg) scale(.9)}100%{transform:translate(-78px,38px) rotate(-9deg) scale(1)}}
+@keyframes reaperPatrol3{0%{transform:translate(0,0) rotate(6deg) scale(1)}30%{transform:translate(28px,-24px) rotate(-4deg) scale(.92)}65%{transform:translate(70px,-5px) rotate(8deg) scale(1.06)}100%{transform:translate(44px,-58px) rotate(-5deg) scale(.94)}}
+@keyframes reaperPatrol4{0%{transform:translate(0,0) rotate(-7deg) scale(.92)}35%{transform:translate(-30px,-18px) rotate(5deg) scale(1.04)}70%{transform:translate(-68px,-55px) rotate(-3deg) scale(.9)}100%{transform:translate(-34px,-82px) rotate(7deg) scale(1.02)}}
+@keyframes reaperPatrol5{0%{transform:translate(0,0) rotate(-5deg)}50%{transform:translate(80px,42px) rotate(9deg)}100%{transform:translate(135px,8px) rotate(-3deg)}}
+@keyframes reaperPatrol6{0%{transform:translate(0,0) rotate(4deg)}50%{transform:translate(-82px,48px) rotate(-8deg)}100%{transform:translate(-130px,12px) rotate(4deg)}}
+@keyframes reaperPatrol7{0%{transform:translate(0,0) rotate(5deg)}50%{transform:translate(72px,-42px) rotate(-7deg)}100%{transform:translate(122px,-8px) rotate(4deg)}}
+@keyframes reaperPatrol8{0%{transform:translate(0,0) rotate(-5deg)}50%{transform:translate(-76px,-40px) rotate(7deg)}100%{transform:translate(-120px,-10px) rotate(-4deg)}}
+@media(max-width:700px){.raid-roaming-reaper{width:52px;height:52px;font-size:32px;opacity:.2}.reaper-2,.reaper-4{font-size:28px}.reaper-5,.reaper-6,.reaper-7,.reaper-8{font-size:24px}.raid-battle-screen .game-question-card:before{position:relative;z-index:7}}
