@@ -280,3 +280,11 @@
 /* Season 2 anonymous player identity */
 .profile-home-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.profile-recovery{margin-bottom:16px}.uid-box{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px;margin:14px 0;border:1px solid rgba(255,255,255,.12);border-radius:14px;background:rgba(255,255,255,.05)}.uid-box span{opacity:.7;font-size:13px}.uid-box b{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}.recovery-new{display:grid;gap:6px;padding:16px;margin:14px 0;border:1px solid rgba(255,255,255,.2);border-radius:14px;background:rgba(255,255,255,.07)}.recovery-new span{font-size:12px;opacity:.7}.recovery-new b{font:900 22px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.08em;word-break:break-all}.recovery-new small{color:#ffd166}.recovery-status{padding:12px;border-radius:12px;background:rgba(255,255,255,.04)}
 @media(max-width:640px){.uid-box{align-items:flex-start;flex-direction:column}.recovery-new b{font-size:17px}.profile-home-actions{width:100%}.profile-home-actions button{flex:1}}
+/* v8.5.1 · Death Mode Last Chance */
+.option-revival{border-color:#d7a93b!important;background:linear-gradient(135deg,rgba(255,215,92,.10),rgba(255,255,255,.03));}
+.option-revival:has(input:checked){box-shadow:0 0 0 2px rgba(255,215,92,.28),0 0 24px rgba(255,215,92,.16);}
+.revival-info{position:relative;overflow:hidden;border-color:#d7a93b!important;background:linear-gradient(135deg,rgba(255,215,92,.14),rgba(160,100,255,.08));box-shadow:0 0 28px rgba(255,215,92,.12);}
+.revival-info:before,.revival-info:after{content:'✦';position:absolute;opacity:.5;animation:revivalSpark 1.8s ease-in-out infinite;}
+.revival-info:before{right:12%;top:15%;font-size:18px}.revival-info:after{left:14%;bottom:10%;font-size:13px;animation-delay:.6s}
+@keyframes revivalSpark{0%,100%{transform:translateY(5px) scale(.8);opacity:.15}50%{transform:translateY(-5px) scale(1.15);opacity:.8}}
+.death-revival-preview{position:relative;overflow:hidden}
