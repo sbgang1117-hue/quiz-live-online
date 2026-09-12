@@ -173,6 +173,11 @@
 .death-spectator-answer .death-spectator-icon{font-size:34px;filter:drop-shadow(0 0 12px #ff334d66)}
 .death-spectator-answer strong{font-size:18px;color:#ff7b86}
 .death-spectator-answer span{font-size:11px;color:#aeb6c4;line-height:1.5}
+/* v8.5.2 · Revival spectator uses a distinct hopeful treatment from eliminated/death UI */
+.death-spectator-answer.revival-spectator-answer{border-color:#63d8c5aa;background:linear-gradient(145deg,#102a2bdd,#111b1add);box-shadow:inset 0 0 34px #3dd8c20f,0 0 24px #3dd8c20b}
+.death-spectator-answer.revival-spectator-answer .death-spectator-icon{filter:drop-shadow(0 0 12px #63d8c577)}
+.death-spectator-answer.revival-spectator-answer strong{color:#79e6d4}
+.death-spectator-answer.revival-spectator-answer span{color:#b8d8d3}
 @media(max-width:800px){.speedrun-host-screen .speedrun-layout{grid-template-columns:1fr}.speedrun-host-screen .speedrun-live-panel{position:static;order:2}}
 
 
