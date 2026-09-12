@@ -152,9 +152,11 @@ if(r.phase==='speedrun'){s.emit('speedrun:start',{total:q.questions.length,title
 else if(r.phase==='riskChoice'&&r.questionIndex>=0){const left=Math.max(0,(r.riskDeadline||Date.now()+5000)-Date.now());s.emit('question:riskChoice',{index:r.questionIndex,total:q.questions.length,seconds:Math.ceil(left/1000),deadline:r.riskDeadline,question:pubQ(q.questions[r.questionIndex])});}
 else if(r.phase==='raidIntro'&&r.questionIndex>=0){const left=Math.max(0,(r.raidDeadline||Date.now()+3000)-Date.now());s.emit('question:raidIntro',{index:r.questionIndex,total:q.questions.length,seconds:Math.ceil(left/1000),deadline:r.raidDeadline,question:pubQ(q.questions[r.questionIndex])});}
 else if(r.phase==='question'&&r.questionIndex>=0)s.emit('question:start',{index:r.questionIndex,total:q.questions.length,question:pubQ(q.questions[r.questionIndex]),startedAt:r.startedAt});s.emit('host:answers',[...r.answers.entries()].map(([playerId,a])=>({playerId,nickname:r.participants.get(playerId)?.nickname||'Player',...a})));broadcast(r)});
-s.on('player:join',async({code,nickname,reconnectToken,avatar,playerId})=>{
+s.on('player:join',async({code,nickname,reconnectToken,avatar,playerId},ack)=>{
+ const reply=v=>{if(typeof ack==='function')ack(v)};
+ try{
  const r=rooms.get(String(code));
- if(!r)return s.emit('error:msg','방을 찾을 수 없습니다.');
+ if(!r){reply({ok:false,error:'방을 찾을 수 없습니다. 새 방 링크인지 확인해주세요.'});return s.emit('error:msg','방을 찾을 수 없습니다. 새 방 링크인지 확인해주세요.');}
  let existing=null;
  if(reconnectToken)existing=[...r.participants.values()].find(p=>p.reconnectToken===reconnectToken);
  if(existing){
@@ -163,13 +165,18 @@ s.on('player:join',async({code,nickname,reconnectToken,avatar,playerId})=>{
   if(r.answers.has(oldId)){const a=r.answers.get(oldId);r.answers.delete(oldId);r.answers.set(s.id,a)}
   s.data.reconnectToken=reconnectToken;s.data.roomCode=r.code;s.data.host=false;s.join(r.code);
   const rejoinedQuiz=r.quizData||await getQuiz(r.quizId);const reRaidQs=(rejoinedQuiz?.questions||[]).filter(x=>x.raidEnabled);const reRaidSummary=reRaidQs.length?reRaidQs.map((x,i)=>{const t=x.raidThresholdType==='percent'?`정답자 ${Math.max(1,Math.min(100,+x.raidThreshold||1))}%`:`정답자 ${Math.max(1,+x.raidThreshold||1)}명`;return `레이드 ${i+1}: ${t} 달성`}).join(' · '):'';s.emit('player:joined',{code:r.code,playerId:existing.playerId||null,nickname:existing.nickname,avatar:existing.avatar||'🦊',title:rejoinedQuiz?.title||'',reconnected:true,score:existing.score,reconnectToken,mode:r.mode||'normal',comboEnabled:!!r.comboEnabled,raidRules:{enabled:reRaidQs.length>0,summary:reRaidSummary}});
-  broadcast(r);await syncPlayer(s,r);return;
+  broadcast(r);await syncPlayer(s,r);reply({ok:true,code:r.code,reconnected:true});return;
  }
- if(r.participants.size>=32)return s.emit('error:msg','최대 32명까지 참가할 수 있습니다.');
+ if(r.participants.size>=32){reply({ok:false,error:'이 방은 최대 32명이 참가할 수 있습니다.'});return s.emit('error:msg','이 방은 최대 32명이 참가할 수 있습니다.');}
  const token=id(24),allowedAvatars=['🦊','🐱','🐶','🐼','🐸','🐯','🐰','🐨','🦄','🐙','👾','🤖','sub1','sub2','sub3','sub4','sub5','sub6','sub7','sub8','sub9','sub10','sub11','sub12'];const safeAvatar=allowedAvatars.includes(String(avatar))?String(avatar):'🦊';const profile=await ensurePlayer(String(playerId||''));let assignedTeam=null;if(r.mode==='team'){const red=[...r.participants.values()].filter(p=>p.team==='red').length,blue=[...r.participants.values()].filter(p=>p.team==='blue').length;if(red<blue)assignedTeam='red';else if(blue<red)assignedTeam='blue';else assignedTeam=Math.random()<0.5?'red':'blue';}const p={id:s.id,playerId:profile.id,nickname:String(nickname||'Player').trim().slice(0,20)||'Player',avatar:safeAvatar,team:assignedTeam,score:0,combo:0,maxCombo:0,eliminated:false,reconnectToken:token,disconnectedAt:null};
  r.participants.set(s.id,p);if(r.mode==='speedrun'&&r.phase==='speedrun'){p.speedIndex=0;p.speedRunStartedAt=Date.now();p.speedStartedAt=p.speedRunStartedAt;p.speedHistory=[];p.speedFinished=false} s.join(r.code);s.data.roomCode=r.code;s.data.reconnectToken=token;
- const joinedQuiz=r.quizData||await getQuiz(r.quizId);const raidQs=(joinedQuiz?.questions||[]).filter(x=>x.raidEnabled);const raidSummary=raidQs.length?raidQs.map((x,i)=>{const t=x.raidThresholdType==='percent'?`정답자 ${Math.max(1,Math.min(100,+x.raidThreshold||1))}%`:`정답자 ${Math.max(1,+x.raidThreshold||1)}명`;return `레이드 ${i+1}: ${t} 달성`}).join(' · '):'';s.emit('player:joined',{code:r.code,playerId:p.playerId,nickname:p.nickname,avatar:p.avatar,title:joinedQuiz?.title||'',reconnectToken:token,mode:r.mode||'normal',comboEnabled:!!r.comboEnabled,raidRules:{enabled:raidQs.length>0,summary:raidSummary}});
- broadcast(r);await syncPlayer(s,r);
+ const joinedQuiz=r.quizData;const raidQs=(joinedQuiz?.questions||[]).filter(x=>x.raidEnabled);const raidSummary=raidQs.length?raidQs.map((x,i)=>{const t=x.raidThresholdType==='percent'?`정답자 ${Math.max(1,Math.min(100,+x.raidThreshold||1))}%`:`정답자 ${Math.max(1,+x.raidThreshold||1)}명`;return `레이드 ${i+1}: ${t} 달성`}).join(' · '):'';s.emit('player:joined',{code:r.code,playerId:p.playerId,nickname:p.nickname,avatar:p.avatar,title:joinedQuiz?.title||'',reconnectToken:token,mode:r.mode||'normal',comboEnabled:!!r.comboEnabled,raidRules:{enabled:raidQs.length>0,summary:raidSummary}});
+ broadcast(r);await syncPlayer(s,r);reply({ok:true,code:r.code,reconnected:false,playerId:p.playerId});
+ }catch(e){
+ console.error('PLAYER JOIN ERROR',e);
+ reply({ok:false,error:'참가 처리 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'});
+ s.emit('error:msg','참가 처리 중 서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+ }
 });
 s.on('host:start',(ack)=>{const reply=v=>{if(typeof ack==='function')ack(v)};const r=rooms.get(s.data.roomCode);if(!r||!s.data.host)return reply({ok:false,error:'주최자 연결이 끊겼거나 방을 찾을 수 없습니다.'});if(r.phase!=='lobby')return reply({ok:false,error:'이미 게임이 시작되었거나 시작할 수 없는 상태입니다.'});if(r.starting)return reply({ok:false,error:'게임 시작을 처리 중입니다. 잠시만 기다려주세요.'});if(r.mode==='team'){const n=activeParticipantCount(r);if(n<2)return reply({ok:false,error:'팀 모드는 2명 이상이 필요합니다.'});}r.starting=true;reply({ok:true});void startQuestion(r).catch(e=>{r.starting=false;console.error('START ERROR',e);s.emit('error:msg','게임 시작 중 오류가 발생했습니다.')})});
 s.on('host:skip',async()=>{const r=rooms.get(s.data.roomCode);if(!r||!s.data.host)return;if(r.phase==='question'){clearTimeout(r.nextTimer);await reveal(r)}else if(r.phase==='reveal'||r.phase==='between'){clearTimeout(r.revealTimer);const q=r.quizData||await getQuiz(r.quizId);if(r.questionIndex+1<q.questions.length){r.phase='between';io.to(r.code).emit('question:nextPreview',{index:r.questionIndex+1,total:q.questions.length,question:pubQ(q.questions[r.questionIndex+1])});broadcast(r);r.revealTimer=setTimeout(()=>startQuestion(r),50)}else finish(r)}});
