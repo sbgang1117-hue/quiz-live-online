@@ -91,3 +91,10 @@ Postgres를 사용하려면 `DATABASE_URL`을 설정합니다. 설정하지 않�
 - Removed duplicate startQuestion definition that could bypass first-question HIGH RISK/RAID intros.
 - HIGH RISK now always shows a dedicated 5-second pre-question screen.
 - RAID now always shows a dedicated 7-second reaper/rules pre-question screen, including question 1.
+
+## Season 2 Pilot
+- 플레이어 ID: 회원가입 없이 브라우저 `localStorage`에 1회 생성되어 경기 기록의 기준이 됩니다.
+- 프로필: 닉네임/아바타, 레벨/XP, 경기 수, 우승, 정확도, 최고 점수, 최고 콤보를 표시합니다.
+- 경기 기록: 게임 종료 시 참가자의 결과를 DB(`players`, `matches`, `match_players`) 또는 로컬 `data/players.json`에 저장합니다.
+- 팀 모드는 홀수 인원도 시작할 수 있으며 RED/BLUE가 자동으로 균형 배정됩니다.
+- 업적/출제자 통계는 아직 넣지 않은 시험판입니다.

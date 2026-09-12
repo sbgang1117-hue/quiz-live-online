@@ -267,3 +267,13 @@
 @keyframes reaperPatrol7{0%{transform:translate(0,0) rotate(5deg)}50%{transform:translate(72px,-42px) rotate(-7deg)}100%{transform:translate(122px,-8px) rotate(4deg)}}
 @keyframes reaperPatrol8{0%{transform:translate(0,0) rotate(-5deg)}50%{transform:translate(-76px,-40px) rotate(7deg)}100%{transform:translate(-120px,-10px) rotate(-4deg)}}
 @media(max-width:700px){.raid-roaming-reaper{width:52px;height:52px;font-size:32px;opacity:.2}.reaper-2,.reaper-4{font-size:28px}.reaper-5,.reaper-6,.reaper-7,.reaper-8{font-size:24px}.raid-battle-screen .game-question-card:before{position:relative;z-index:7}}
+/* Season 2 pilot: player profile */
+.profile-home-btn{margin-top:14px}
+.profile-screen{max-width:900px}
+.profile-hero{display:flex;align-items:center;gap:24px;margin:18px 0}
+.profile-avatar{width:104px;height:104px;display:grid;place-items:center;border-radius:28px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);overflow:hidden;font-size:56px}
+.profile-avatar img{width:78px;height:78px;object-fit:contain}
+.profile-main{flex:1}.profile-main h1{margin:5px 0 10px;font-size:32px}.profile-level{font-weight:900;letter-spacing:.08em;font-size:13px;opacity:.8}
+.xp-bar{height:10px;background:rgba(255,255,255,.09);border-radius:99px;overflow:hidden;margin:10px 0 7px}.xp-bar span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#795cff,#b56cff)}
+.profile-edit{margin-bottom:16px}.profile-edit h2{margin-top:0}.profile-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.profile-stat-grid .card{padding:18px}.profile-stat-grid small{display:block;opacity:.7}.profile-stat-grid strong{display:block;font-size:28px;margin-top:5px}.profile-note{text-align:center;opacity:.7;margin:22px 0}
+@media(max-width:640px){.profile-hero{align-items:flex-start}.profile-avatar{width:82px;height:82px;border-radius:22px}.profile-avatar img{width:62px;height:62px}.profile-main h1{font-size:25px}.profile-stat-grid{grid-template-columns:repeat(2,1fr)}}
